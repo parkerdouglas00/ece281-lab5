@@ -44,11 +44,49 @@ end top_basys3;
 architecture top_basys3_arch of top_basys3 is 
   
 	-- declare components and signals
+	component controller_fsm is
+        port ( i_reset : in std_logic;
+               i_adv : in std_logic;
+               o_cycle : out std_logic_vector(3 downto 0)
+             );
+    end component controller_fsm;
+    
+    component reg is
+        port ( i_A      : in std_logic_vector(7 downto 0);
+               i_clk    : in std_logic;
+               o_B      : out std_logic_vector(7 downto 0)
+        );
+    end component reg;
+    
+    -- ALU Component
+    
+    -- twoscomp_decimal component
+    
+    -- TDM4 component
+    
+    -- sevenSegDecoder component
+    
+    -- clock divider component
 
   
 begin
 	-- PORT MAPS ----------------------------------------
-
+    
+    -- controller_fsm_inst
+    
+    -- register_inst_A
+    
+    -- register_inst_B
+    
+    -- ALU_inst
+    
+    -- twoscomp_decimal_inst
+    
+    -- TDM4 inst
+    
+    -- sevenSegDecoder inst
+    
+    -- cock_divider_inst
 	
 	
 	-- CONCURRENT STATEMENTS ----------------------------

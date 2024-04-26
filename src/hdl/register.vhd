@@ -32,8 +32,8 @@ entity reg is
 end reg;
 
 architecture Behavioral of reg is
-    signal f_A      : std_logic_vector(7 downto 0) := x"0";
-    signal f_B      : std_logic_vector(7 downto 0) := x"0";
+    signal f_A      : std_logic_vector(7 downto 0) := "00000000";
+    signal f_B      : std_logic_vector(7 downto 0) := "00000000";
 
     begin
         process(i_clk)

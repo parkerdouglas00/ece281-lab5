@@ -23,10 +23,12 @@
 --|
 --| ALU OPCODES:
 --|
---|     ADD     000
---|
---|
---|
+--|     ADD         000
+--|     SUBTRACT    001
+--|     AND         010
+--|     OR          011
+--|     LEFT SHIFT  100
+--|     RIGHT SHIFT 101
 --|
 --+----------------------------------------------------------------------------
 library ieee;
@@ -35,7 +37,16 @@ library ieee;
 
 
 entity ALU is
--- TODO
+    port(
+        --inputs
+        i_op        : in std_logic_vector(2 downto 0);
+        i_A         : in std_logic_vector(7 downto 0);
+        i_B         : in std_logic_vector(7 downto 0);
+        
+        --outputs
+        o_result    : out std_logic_vector(7 downto 0);
+        o_flags     : out std_logic_vector(2 downto 0)
+    );
 end ALU;
 
 architecture behavioral of ALU is 
