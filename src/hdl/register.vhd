@@ -21,38 +21,30 @@
 --|
 --+----------------------------------------------------------------------------
 library ieee;
-  use ieee.std_logic_1164.all;
-  use ieee.numeric_std.all;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-
-entity top_basys3 is
-    port (
-        --inputs
-        clk     : in std_logic; -- native 100MHz FPGA clock
-        btnU    : in std_logic;
-        btnC    : in std_logic;
-        sw      : in std_logic_vector(15 downto 0);
-        
-        --outputs
-        led     : out std_logic_vector(15 downto 13);
-        seg     : out std_logic_vector(7 downto 0);
-        an      : out std_logic_vector(3 downto 0)
+entity reg is
+    port ( i_A      : in std_logic_vector(7 downto 0);
+           i_clk    : in std_logic;
+           o_B      : out std_logic_vector(7 downto 0)
     );
+end reg;
 
-end top_basys3;
+architecture Behavioral of reg is
+    signal f_A      : std_logic_vector(7 downto 0) := x"0";
+    signal f_B      : std_logic_vector(7 downto 0) := x"0";
 
-architecture top_basys3_arch of top_basys3 is 
-  
-	-- declare components and signals
+    begin
+        process(i_clk)
+        begin
+        if rising_edge(i_clk) then
+            f_B <= f_A;
+        end if;
+        end process;
+        
+        f_A <= i_A;
+        o_B <= f_B;
 
-  
-begin
-	-- PORT MAPS ----------------------------------------
 
-	
-	
-	-- CONCURRENT STATEMENTS ----------------------------
-	
-	
-	
-end top_basys3_arch;
+end Behavioral;
