@@ -35,7 +35,7 @@ entity top_basys3 is
         
         --outputs
         led     : out std_logic_vector(15 downto 13);
-        seg     : out std_logic_vector(7 downto 0);
+        seg     : out std_logic_vector(6 downto 0);
         an      : out std_logic_vector(3 downto 0)
     );
 
@@ -58,39 +58,169 @@ architecture top_basys3_arch of top_basys3 is
         );
     end component reg;
     
-    -- ALU Component
+    component ALU is
+        port(
+            --inputs
+            i_op        : in std_logic_vector(2 downto 0);
+            i_A         : in std_logic_vector(7 downto 0);
+            i_B         : in std_logic_vector(7 downto 0);
+            
+            --outputs
+            o_result    : out std_logic_vector(7 downto 0);
+            o_flags     : out std_logic_vector(2 downto 0)
+        );
+    end component ALU;
     
-    -- twoscomp_decimal component
+    component twoscomp_decimal is
+        port (
+            i_binary: in std_logic_vector(7 downto 0);
+            o_negative: out std_logic;
+            o_hundreds: out std_logic_vector(3 downto 0);
+            o_tens: out std_logic_vector(3 downto 0);
+            o_ones: out std_logic_vector(3 downto 0)
+        );
+    end component twoscomp_decimal;
     
-    -- TDM4 component
+    component TDM4 is
+        generic ( constant k_WIDTH : natural  := 4); -- bits in input and output
+        Port ( i_clk		: in  STD_LOGIC;
+               i_reset      : in  STD_LOGIC; -- asynchronous
+               i_D3         : in  STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               i_D2         : in  STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               i_D1         : in  STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               i_D0         : in  STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               o_data       : out STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               o_sel        : out STD_LOGIC_VECTOR (3 downto 0)    -- selected data line (one-cold)
+        );
+    end component TDM4;
     
-    -- sevenSegDecoder component
+    component sevenSegDecoder is
+        port ( i_D : std_logic_vector (3 downto 0);
+               o_S : out std_logic_vector (6 downto 0)
+        );
+    end component sevenSegDecoder;
     
-    -- clock divider component
-
+    component clock_divider is
+        generic ( constant k_DIV : natural := 2	); -- How many clk cycles until slow clock toggles
+                                                   -- Effectively, you divide the clk double this 
+                                                   -- number (e.g., k_DIV := 2 --> clock divider of 4)
+        port (  i_clk    : in std_logic;
+                i_reset  : in std_logic;           -- asynchronous
+                o_clk    : out std_logic           -- divided (slow) clock
+        );
+    end component clock_divider;
+    
+    
+    signal w_cycle      : std_logic_vector(3 downto 0)  := "0000";
+    signal w_clk        : std_logic                     := '0';
+    signal w_A          : std_logic_vector(7 downto 0)  := "00000000";
+    signal w_B          : std_logic_vector(7 downto 0)  := "00000000";
+    signal w_flags      : std_logic_vector(2 downto 0)  := "000";
+    signal w_result     : std_logic_vector(7 downto 0)  := "00000000";
+    signal w_binary     : std_logic_vector(7 downto 0)  := "00000000";
+    signal w_negative   : std_logic                     := '0';
+    signal w_hundreds   : std_logic_vector(3 downto 0)  := "0000";
+    signal w_tens       : std_logic_vector(3 downto 0)  := "0000";
+    signal w_ones       : std_logic_vector(3 downto 0)  := "0000";
+    signal w_data       : std_logic_vector(3 downto 0)  := "0000";
+    signal w_sel        : std_logic_vector(3 downto 0)  := "0000";
   
 begin
 	-- PORT MAPS ----------------------------------------
     
-    -- controller_fsm_inst
+    controller_fsm_inst : controller_fsm
+        port map (
+            -- inputs
+            i_reset => btnU,
+            i_adv   => btnC,
+            
+            -- output
+            o_cycle => w_cycle
+        );
+        
+    cock_divider_inst : clock_divider
+        generic map ( k_DIV => 1000 ) -- output clock is 50 kHz
+        port map (
+            -- inputs
+            i_clk   => clk,
+            i_reset => btnU,
+            
+            --output
+            o_clk   => w_clk
+        );
+
+    reg_inst_A : reg
+        port map (
+            --inputs
+            i_clk   =>  w_cycle(1),
+            i_A     => sw(7 downto 0),
+            
+            --output
+            o_B     => w_A
+        );
     
-    -- register_inst_A
+    reg_inst_B : reg
+        port map (
+            --inputs
+            i_clk   => w_cycle(2),
+            i_A     => sw(7 downto 0),
+            
+            --output
+            o_B     => w_B
+        );
     
-    -- register_inst_B
+    ALU_inst : ALU
+        port map (
+            -- inputs
+            i_A     => w_A,
+            i_B     => w_B,
+            i_op    => sw(2 downto 0),
+            
+            --outputs
+            o_result    => w_result,
+            o_flags     => led(15 downto 13)
+        );
     
-    -- ALU_inst
+    twoscomp_decimal_inst : twoscomp_decimal
+        port map (
+            --input
+            i_binary    => w_binary,
+            
+            --outputs
+            o_negative  => w_negative,
+            o_hundreds  => w_hundreds,
+            o_tens      => w_tens,
+            o_ones      => w_ones
+        );
     
-    -- twoscomp_decimal_inst
+    TDM4_inst : TDM4
+        generic map ( k_WIDTH => 4 )
+        port map (
+            -- inputs
+            i_clk   => w_clk,
+            i_reset => btnU,
+            i_D3(0) => w_negative,
+            i_D3(3 downto 1) => "111",
+            i_D2    => w_hundreds,
+            i_D1    => w_tens,
+            i_D0    => w_ones,
+            
+            --outputs
+            o_data  => w_data,
+            o_sel   => an
+        );
     
-    -- TDM4 inst
-    
-    -- sevenSegDecoder inst
-    
-    -- cock_divider_inst
+    sevenSegDecoder_inst : sevenSegDecoder
+        port map (
+            --input
+            i_D     => w_data,
+            
+            --output
+            o_S     => seg
+        );
 	
 	
 	-- CONCURRENT STATEMENTS ----------------------------
-	
 	
 	
 end top_basys3_arch;

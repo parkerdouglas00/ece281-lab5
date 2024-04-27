@@ -48,7 +48,6 @@ begin
     begin
         if i_reset = '1' then
             f_Q         <= "0001";
-            f_Q_next    <= "0001";
         elsif rising_edge(i_adv) then
             f_Q <= f_Q_next;
         end if;
