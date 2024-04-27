@@ -52,6 +52,28 @@ end ALU;
 architecture behavioral of ALU is 
   
 	-- declare components and signals
+	
+	-- components
+	
+	-- Task C: bit_shifter
+	
+	-- signals
+	
+	signal w_A     :   std_logic_vector(7 downto 0)  := "00000000";
+	signal w_B     :   std_logic_vector(7 downto 0)  := "00000000";
+	signal w_sum   :   std_logic_vector(7 downto 0)  := "00000000";
+    signal w_Cout  :   std_logic    := '0';
+    signal v_sum   :   integer := 0;
+    signal v_A     :   integer := 0;
+    signal v_B     :   integer := 0;
+    -- Task B: w_B_neg
+    -- Task B: w_B_adj
+	-- Task C: signal w_and   : std_logic_vector(7 downto 0)  := "00000000";
+	-- Task C: signal w_or    : std_logic_vector(7 downto 0)  := "00000000";
+	-- Task C: w_and_or
+	-- Task C: w_result
+	-- Task C: w_shifted
+	
 
   
 begin
@@ -60,7 +82,19 @@ begin
 	
 	
 	-- CONCURRENT STATEMENTS ----------------------------
+	v_A    <= to_integer(unsigned(i_A));
+	v_B    <= to_integer(unsigned(i_B));
+	v_sum  <= v_A + v_B;
+	w_sum  <= std_logic_vector(to_unsigned(v_sum, 8));
+	w_Cout <= i_A(7) and i_B(7);
 	
+	o_flags(0) <= w_Cout;
+	
+	with w_sum select
+	   o_flags(1)  <= '1' when "00000000",
+	                  '0' when others;
+	
+	o_flags(2)     <= w_sum(7);
 	
 	
 end behavioral;
