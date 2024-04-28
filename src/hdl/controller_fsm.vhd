@@ -42,15 +42,17 @@ architecture Behavioral of controller_fsm is
 
     signal f_Q      : std_logic_vector(3 downto 0) := "0001";
     signal f_Q_next : std_logic_vector(3 downto 0) := "0001";
+    signal last_state : std_logic := '0';
 
 begin
     process(i_adv, i_reset)
     begin
         if i_reset = '1' then
             f_Q         <= "0001";
-        elsif rising_edge(i_adv) then
+        elsif i_adv = '1' and last_state = '0' then
             f_Q <= f_Q_next;
         end if;
+        last_state <= i_adv;
     end process;
    
     with f_Q select
