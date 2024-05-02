@@ -59,15 +59,15 @@ architecture behavioral of ALU is
 	
 	-- signals
 	
-	signal w_A     :   std_logic_vector(7 downto 0)  := "00000000";
-	signal w_B     :   std_logic_vector(7 downto 0)  := "00000000";
-	signal w_sum   :   std_logic_vector(7 downto 0)  := "00000000";
-    signal w_Cout  :   std_logic    := '0';
-    signal v_sum   :   integer := 0;
-    signal v_A     :   integer := 0;
-    signal v_B     :   integer := 0;
-    -- Task B: w_B_neg
-    -- Task B: w_B_adj
+	signal w_A     :    std_logic_vector(7 downto 0)   := "00000000";
+	signal w_B     :    std_logic_vector(7 downto 0)   := "00000000";
+	signal w_sum   :    std_logic_vector(7 downto 0)   := "00000000";
+    signal w_Cout  :    std_logic    := '0';
+    signal v_sum   :    integer := 0;
+    signal v_A     :    integer := 0;
+    signal v_B     :    integer := 0;
+    signal w_B_neg :    std_logic_vector(7 downto 0)   := "00000000";
+    signal w_B_adj :    std_logic_vector(7 downto 0)   := "00000000";
 	-- Task C: signal w_and   : std_logic_vector(7 downto 0)  := "00000000";
 	-- Task C: signal w_or    : std_logic_vector(7 downto 0)  := "00000000";
 	-- Task C: w_and_or
@@ -87,6 +87,12 @@ begin
 	v_sum  <= v_A + v_B;
 	w_sum  <= std_logic_vector(to_unsigned(v_sum, 8));
 	w_Cout <= i_A(7) and i_B(7);
+	
+	w_B_neg    <= not i_B;
+	
+	with i_op(0) select
+	   w_B_adj <=  i_B when '0',
+	               std_logic_vector(unsigned(w_B_neg) + 1) when '1';
 	
 	o_flags(0) <= w_Cout;
 	
