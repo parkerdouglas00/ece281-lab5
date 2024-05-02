@@ -94,7 +94,7 @@ begin
 	   o_flags(1)  <= '1' when "00000000",
 	                  '0' when others;
 	
-	o_flags(2)     <= w_sum(7);
+	o_flags(2)     <= w_sum(7); -- temp i_op operation
 	
 	o_result       <= w_sum;
 	

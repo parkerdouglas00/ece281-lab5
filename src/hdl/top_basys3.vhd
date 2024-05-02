@@ -47,6 +47,7 @@ architecture top_basys3_arch of top_basys3 is
 	component controller_fsm is
         port ( i_reset : in std_logic;
                i_adv : in std_logic;
+               i_clk   : in std_logic;
                o_cycle : out std_logic_vector(3 downto 0)
              );
     end component controller_fsm;
@@ -74,7 +75,7 @@ architecture top_basys3_arch of top_basys3 is
     component twoscomp_decimal is
         port (
             i_binary: in std_logic_vector(7 downto 0);
-            o_negative: out std_logic;
+            o_negative: out std_logic_vector(3 downto 0);
             o_hundreds: out std_logic_vector(3 downto 0);
             o_tens: out std_logic_vector(3 downto 0);
             o_ones: out std_logic_vector(3 downto 0)
@@ -95,7 +96,7 @@ architecture top_basys3_arch of top_basys3 is
     end component TDM4;
     
     component sevenSegDecoder is
-        port ( i_D : std_logic_vector (3 downto 0);
+        port ( i_D : in std_logic_vector (3 downto 0);
                o_S : out std_logic_vector (6 downto 0)
         );
     end component sevenSegDecoder;
@@ -111,19 +112,20 @@ architecture top_basys3_arch of top_basys3 is
     end component clock_divider;
     
     
-    signal w_cycle      : std_logic_vector(3 downto 0)  := "0000";
-    signal w_clk        : std_logic                     := '0';
-    signal w_A          : std_logic_vector(7 downto 0)  := "00000000";
-    signal w_B          : std_logic_vector(7 downto 0)  := "00000000";
-    signal w_flags      : std_logic_vector(2 downto 0)  := "000";
-    signal w_result     : std_logic_vector(7 downto 0)  := "00000000";
-    signal w_binary     : std_logic_vector(7 downto 0)  := "00000000";
-    signal w_negative   : std_logic                     := '0';
-    signal w_hundreds   : std_logic_vector(3 downto 0)  := "0000";
-    signal w_tens       : std_logic_vector(3 downto 0)  := "0000";
-    signal w_ones       : std_logic_vector(3 downto 0)  := "0000";
-    signal w_data       : std_logic_vector(3 downto 0)  := "0000";
-    signal w_sel        : std_logic_vector(3 downto 0)  := "0000";
+    signal w_cycle          : std_logic_vector(3 downto 0)  := "0000";
+    signal w_clk_TDM        : std_logic                     := '0';
+    signal w_clk_controller : std_logic                     := '0';
+    signal w_A              : std_logic_vector(7 downto 0)  := "00000000";
+    signal w_B              : std_logic_vector(7 downto 0)  := "00000000";
+    signal w_flags          : std_logic_vector(2 downto 0)  := "000";
+    signal w_result         : std_logic_vector(7 downto 0)  := "00000000";
+    signal w_binary         : std_logic_vector(7 downto 0)  := "00000000";
+    signal w_negative       : std_logic_vector(3 downto 0)  := "0000";
+    signal w_hundreds       : std_logic_vector(3 downto 0)  := "0000";
+    signal w_tens           : std_logic_vector(3 downto 0)  := "0000";
+    signal w_ones           : std_logic_vector(3 downto 0)  := "0000";
+    signal w_data           : std_logic_vector(3 downto 0)  := "0000";
+    signal w_sel            : std_logic_vector(3 downto 0)  := "0000";
   
 begin
 	-- PORT MAPS ----------------------------------------
@@ -133,12 +135,13 @@ begin
             -- inputs
             i_reset => btnU,
             i_adv   => btnC,
+            i_clk   => w_clk_controller,
             
             -- output
             o_cycle => w_cycle
         );
         
-    cock_divider_inst : clock_divider
+    clock_divider_inst_TDM : clock_divider
         generic map ( k_DIV => 1000 ) -- output clock is 50 kHz
         port map (
             -- inputs
@@ -146,8 +149,19 @@ begin
             i_reset => btnU,
             
             --output
-            o_clk   => w_clk
+            o_clk   => w_clk_TDM
         );
+        
+    clock_divider_inst_controller : clock_divider
+            generic map ( k_DIV => 250000 ) -- output clock is 200 Hz
+            port map (
+                -- inputs
+                i_clk   => clk,
+                i_reset => btnU,
+                
+                --output
+                o_clk   => w_clk_controller
+            );
 
     reg_inst_A : reg
         port map (
@@ -197,10 +211,9 @@ begin
         generic map ( k_WIDTH => 4 )
         port map (
             -- inputs
-            i_clk   => w_clk,
+            i_clk   => w_clk_TDM,
             i_reset => btnU,
-            i_D3(0) => w_negative,
-            i_D3(3 downto 1) => "111",
+            i_D3 => w_negative,
             i_D2    => w_hundreds,
             i_D1    => w_tens,
             i_D0    => w_ones,
@@ -223,10 +236,10 @@ begin
 	-- CONCURRENT STATEMENTS ----------------------------
 	
 	with w_cycle select
-	   w_binary    <=  w_A when "0001",
-	                   w_B when "0010",
-	                   w_result when "0100",
-	                   "11111111" when others;
+	   w_binary    <=  w_A when "0010",
+	                   w_B when "0100",
+	                   w_result when "1000",
+	                   "00000000" when others;
 	
 	led(3 downto 0)    <= w_cycle;
 	led(12 downto 4)   <= "000000000";

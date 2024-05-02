@@ -32,10 +32,15 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity controller_fsm is
-    Port ( i_reset : in std_logic;
-           i_adv : in std_logic;
-           o_cycle : out std_logic_vector(3 downto 0)
-           );
+    port (
+        -- inputs
+        i_reset : in std_logic;
+        i_adv   : in std_logic;
+        i_clk   : in std_logic;
+        
+        -- output
+        o_cycle : out std_logic_vector(3 downto 0)
+    );
 end controller_fsm;
 
 architecture Behavioral of controller_fsm is
@@ -45,14 +50,16 @@ architecture Behavioral of controller_fsm is
     signal last_state : std_logic := '0';
 
 begin
-    process(i_adv, i_reset, last_state, f_Q_next)
+    process(i_clk)
     begin
-        if i_reset = '1' then
-            f_Q         <= "0001";
-        elsif i_adv = '1' and last_state = '0' then
-            f_Q <= f_Q_next;
+        if rising_edge(i_clk) then
+            if i_reset = '1' then
+                f_Q         <= "0001";
+            elsif i_adv = '1' and last_state = '0' then
+                f_Q <= f_Q_next;
+            end if;
+            last_state <= i_adv;
         end if;
-        last_state <= i_adv;
     end process;
    
     with f_Q select
