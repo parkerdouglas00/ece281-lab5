@@ -45,7 +45,7 @@ architecture Behavioral of controller_fsm is
     signal last_state : std_logic := '0';
 
 begin
-    process(i_adv, i_reset)
+    process(i_adv, i_reset, last_state, f_Q_next)
     begin
         if i_reset = '1' then
             f_Q         <= "0001";

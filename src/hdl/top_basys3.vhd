@@ -34,7 +34,7 @@ entity top_basys3 is
         sw      : in std_logic_vector(15 downto 0);
         
         --outputs
-        led     : out std_logic_vector(15 downto 13);
+        led     : out std_logic_vector(15 downto 0);
         seg     : out std_logic_vector(6 downto 0);
         an      : out std_logic_vector(3 downto 0)
     );
@@ -152,7 +152,7 @@ begin
     reg_inst_A : reg
         port map (
             --inputs
-            i_clk   =>  w_cycle(1),
+            i_clk   => w_cycle(1),
             i_A     => sw(7 downto 0),
             
             --output
@@ -221,6 +221,15 @@ begin
 	
 	
 	-- CONCURRENT STATEMENTS ----------------------------
+	
+	with w_cycle select
+	   w_binary    <=  w_A when "0001",
+	                   w_B when "0010",
+	                   w_result when "0100",
+	                   "11111111" when others;
+	
+	led(3 downto 0)    <= w_cycle;
+	led(12 downto 4)   <= "000000000";
 	
 	
 end top_basys3_arch;

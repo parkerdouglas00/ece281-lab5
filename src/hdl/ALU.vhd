@@ -96,5 +96,7 @@ begin
 	
 	o_flags(2)     <= w_sum(7);
 	
+	o_result       <= w_sum;
+	
 	
 end behavioral;
