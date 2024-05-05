@@ -26,21 +26,36 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity bit_shifter is
-    Port ( i_direction : in STD_LOGIC;
-           i_amount : in STD_LOGIC_VECTOR (7 downto 0);
-           i_A : in STD_LOGIC_VECTOR (8 downto 0);
-           o_B : out STD_LOGIC_VECTOR (7 downto 0));
+    port (
+        --inputs
+        i_direction : in std_logic;
+        i_amount : in std_logic_vector(7 downto 0);
+        i_original : in std_logic_vector(7 downto 0);
+        
+        --output
+        o_shifted : out std_logic_vector(7 downto 0)
+    );
 end bit_shifter;
 
 architecture Behavioral of bit_shifter is
 
-begin
+    signal w_left_shift     :   std_logic_vector(7 downto 0)    := "00000000";
+    signal w_right_shift    :   std_logic_vector(7 downto 0)    := "00000000";
+    signal v_amount         :   integer                         := 0;
 
+begin
+    
+    v_amount    <=  to_integer(unsigned(i_amount));
+    
+    w_left_shift    <=  std_logic_vector(shift_left(unsigned(i_original), v_amount));
+    w_right_shift   <=  std_logic_vector(shift_right(unsigned(i_original), v_amount));
+    
+    with i_direction select
+        o_shifted   <= w_left_shift when '0',
+                       w_right_shift when others;
+    
+    
 
 end Behavioral;

@@ -55,29 +55,50 @@ architecture behavioral of ALU is
 	
 	-- components
 	
-	-- Task C: bit_shifter
+    component bit_shifter is
+        port (
+            --inputs
+            i_direction : in std_logic;
+            i_amount : in std_logic_vector(7 downto 0);
+            i_original : in std_logic_vector(7 downto 0);
+            
+            --output
+            o_shifted : out std_logic_vector(7 downto 0)
+        );
+    end component;
 	
 	-- signals
 	
-	signal w_A     :    std_logic_vector(7 downto 0)   := "00000000";
-	signal w_B     :    std_logic_vector(7 downto 0)   := "00000000";
-	signal w_sum   :    std_logic_vector(7 downto 0)   := "00000000";
-    signal w_Cout  :    std_logic    := '0';
-    signal v_sum   :    integer := 0;
-    signal v_A     :    integer := 0;
-    signal v_B     :    integer := 0;
-    signal w_B_neg :    std_logic_vector(7 downto 0)   := "00000000";
-    signal w_B_adj :    std_logic_vector(7 downto 0)   := "00000000";
-	-- Task C: signal w_and   : std_logic_vector(7 downto 0)  := "00000000";
-	-- Task C: signal w_or    : std_logic_vector(7 downto 0)  := "00000000";
-	-- Task C: w_and_or
-	-- Task C: w_result
-	-- Task C: w_shifted
+	signal w_A         :   std_logic_vector(7 downto 0)   := "00000000";
+	signal w_B         :   std_logic_vector(7 downto 0)   := "00000000";
+	signal w_sum       :   std_logic_vector(7 downto 0)   := "00000000";
+    signal w_Cout      :   std_logic                      := '0';
+    signal v_sum       :   integer                        := 0;
+    signal v_A         :   integer                        := 0;
+    signal v_B         :   integer                        := 0;
+    signal w_B_neg     :   std_logic_vector(7 downto 0)   := "00000000";
+    signal w_B_adj     :   std_logic_vector(7 downto 0)   := "00000000";
+	signal w_and       :   std_logic_vector(7 downto 0)   := "00000000";
+	signal w_or        :   std_logic_vector(7 downto 0)   := "00000000";
+	signal w_and_or    :   std_logic_vector(7 downto 0)   := "00000000";
+	signal w_result    :   std_logic_vector(7 downto 0)   := "00000000";
+	signal w_shifted   :   std_logic_vector(7 downto 0)   := "00000000";
 	
 
   
 begin
 	-- PORT MAPS ----------------------------------------
+	
+	bit_shifter_inst : bit_shifter
+	   port map (
+	       -- inputs
+	       i_direction => i_op(0),
+	       i_original  => i_A,
+	       i_amount    => i_B,
+	       
+	       --output
+	       o_shifted   => w_shifted
+	   );
 
 	
 	
@@ -93,6 +114,19 @@ begin
 	with i_op(0) select
 	   v_B <=  to_integer(unsigned(i_B)) when '0',
 	           to_integer(unsigned(w_B_neg)) when others;
+	           
+	w_and  <= i_A and i_B;
+	w_or   <= i_A or i_B;
+	
+	with i_op(0) select
+	   w_and_or    <= w_and when '0',
+	                  w_or when others;
+	
+	with i_op(2 downto 1) select
+	   w_result    <=  w_and_or    when "01",
+	                   w_shifted   when "10",
+	                   w_sum       when others;
+	
 	
 	o_flags(0) <= w_Cout;
 	
@@ -102,7 +136,7 @@ begin
 	
 	o_flags(2)     <= w_sum(7);
 	
-	o_result       <= w_sum;
+	o_result       <= w_result;
 	
 	
 end behavioral;
