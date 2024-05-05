@@ -82,17 +82,17 @@ begin
 	
 	
 	-- CONCURRENT STATEMENTS ----------------------------
-	v_A    <= to_integer(unsigned(i_A));
-	v_B    <= to_integer(unsigned(i_B));
-	v_sum  <= v_A + v_B;
-	w_sum  <= std_logic_vector(to_unsigned(v_sum, 8));
-	w_Cout <= i_A(7) and i_B(7);
+	v_A        <= to_integer(unsigned(i_A));
 	
-	w_B_neg    <= not i_B;
+	v_sum      <= v_A + v_B;
+	w_sum      <= std_logic_vector(to_unsigned(v_sum, 8));
+	w_Cout     <= i_A(7) and i_B(7);
+	
+	w_B_neg    <= std_logic_vector(to_unsigned(to_integer(unsigned(not i_B)) + 1, 8));
 	
 	with i_op(0) select
-	   w_B_adj <=  i_B when '0',
-	               std_logic_vector(unsigned(w_B_neg) + 1) when '1';
+	   v_B <=  to_integer(unsigned(i_B)) when '0',
+	           to_integer(unsigned(w_B_neg)) when others;
 	
 	o_flags(0) <= w_Cout;
 	
@@ -100,7 +100,7 @@ begin
 	   o_flags(1)  <= '1' when "00000000",
 	                  '0' when others;
 	
-	o_flags(2)     <= w_sum(7); -- temp i_op operation
+	o_flags(2)     <= w_sum(7);
 	
 	o_result       <= w_sum;
 	

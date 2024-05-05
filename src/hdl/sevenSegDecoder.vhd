@@ -47,6 +47,12 @@
 --|    s_<signal name>          = state name
 --|
 --+----------------------------------------------------------------------------
+
+-- Input: 4-bit binary value
+-- 0x0 --> 0x9: Displays Value
+-- 0xA --> 0xE: Not accepted, not needed in basic_cpu design requirements
+-- 0xF: Represents negative value, displays "-" on seven-segment display
+
 library ieee;
   use ieee.std_logic_1164.all;
   use ieee.numeric_std.all;
@@ -78,38 +84,38 @@ begin
     o_S(6) <= c_Sg;
     
     c_Sa <= '1' when ( (i_D = x"1") or
-                       (i_D = x"4") ) else '0';
+                       (i_D = x"4")or
+                       (i_D = x"F") ) else '0';
     
     c_Sb <= '1' when ( (i_D = x"5") or
-                       (i_D = x"6") ) else '0';
+                       (i_D = x"6")or
+                       (i_D = x"F") ) else '0';
     
     c_Sc <= '1' when (  (i_D = x"2") or
-                        (i_D = x"C") or
-                        (i_D = x"E")) else '0';
+                        (i_D = x"F") ) else '0';
     
     c_Sd <= '1' when (  (i_D = x"1") or
                         (i_D = x"4") or
                         (i_D = x"7") or
                         (i_D = x"9") or
-                        (i_D = x"A")) else '0';
+                        (i_D = x"F") ) else '0';
    
     c_Se <= '1' when (  (i_D = x"1") or
                         (i_D = x"3") or    
                         (i_D = x"4") or    
                         (i_D = x"5") or    
                         (i_D = x"7") or    
-                        (i_D = x"9") ) else '0';
+                        (i_D = x"9")or
+                         (i_D = x"F") ) else '0';
                         
     c_Sf <= '1' when (  (i_D = x"1") or
                         (i_D = x"2") or
                         (i_D = x"3") or
                         (i_D = x"7") or
-                        (i_D = x"C") or
-                        (i_D = x"D") ) else '0';
+                        (i_D = x"F") ) else '0';
                         
     c_Sg <= '1' when (  (i_D = x"0") or
                         (i_D = x"1") or
-                        (i_D = x"7") or
-                        (i_D = x"F") ) else '0';
+                        (i_D = x"7") ) else '0';
         
 end sevenSegDecoder_arch;
